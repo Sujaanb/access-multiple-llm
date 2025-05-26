@@ -5,3 +5,5 @@ langchain-google-genai                       # Integration of LangChain with Goo
 langchain-core                               # Core LangChain library
 langchain-community                          # Community contributions to LangChain
 python-dotenv                                # For loading environment variables from a .env file
+langgraph                                    # Stateful orchestration framework for LangChain
+langsmith                                    # Integration of LangChain with LangSmith
