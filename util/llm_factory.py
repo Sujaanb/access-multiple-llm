@@ -66,11 +66,12 @@ class LLMFactory:
         """
         Creates and returns an instance of the appropriate LLM.
         """
+        load_dotenv(override=True)
         if local_llm:
             # If local_llm is True, use the local LLM instance.
             return ChatOllama(
                 model=constants.local_llm,  # Use exact model name from 'ollama list'
-                base_url=os.getenv("local_model_url"),  # Ollama server URL
+                base_url=os.getenv("local_model_url", "http://localhost:11434"),  # Ollama server URL
             )
         model_name = LLMFactory.get_model_name()
         api_key = LLMFactory.get_api_key()
