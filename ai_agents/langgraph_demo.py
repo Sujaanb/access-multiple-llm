@@ -13,7 +13,8 @@ from langgraph.graph import StateGraph, END
 
 class EssayState(TypedDict):
     # State Representation
-    question: str
-    summary: str
+    query: str
+    input_docs: list[str]
+    recent_trends: str
     outline: str
     essay: str

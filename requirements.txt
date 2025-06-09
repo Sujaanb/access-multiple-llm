@@ -7,3 +7,11 @@ langchain-community                          # Community contributions to LangCh
 python-dotenv                                # For loading environment variables from a .env file
 langgraph                                    # Stateful orchestration framework for LangChain
 langsmith                                    # Integration of LangChain with LangSmith
+chromadb                                     # ChromaDB for vector storage
+black                                        # Code formatter
+unstructured                                 # Loads unstructured loaders from langchain
+networkx                                     # Required for using UnstructuredExcelLoader
+openpyxl                                     # Reads/writes Excel 2010 xlsx/xlsm/xltx/xltm files
+pandas                                       # Data manipulation and analysis library
+pypdf                                        # PDF toolkit for reading and manipulating PDF files
+python-docx                                  # Reads/writes Microsoft Word 2007/2010 docx files
