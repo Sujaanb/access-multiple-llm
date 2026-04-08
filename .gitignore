@@ -7,6 +7,8 @@ ENV/
 env.bak/
 venv.bak/
 
+# LLM Cache and Cost Tracking
+llm_cache/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
