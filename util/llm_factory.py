@@ -15,8 +15,10 @@ from langchain.prompts import (
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
+from langchain.schema import AIMessage
 
 import util.constants as constants
+from util.cache_and_cost import CacheManager
 
 class LLMFactory:
 
@@ -95,13 +97,35 @@ class LLMFactory:
         system_prompt: str = None,
         human_message: str = None,
         temperature=0.3,
-        local_llm=False
+        local_llm=False,
+        use_cache=True
     ):
         """
         Invokes the LLM with given prompts using ChatPromptTemplate.
+        
+        Args:
+            system_prompt: System message for the LLM
+            human_message: User query/message
+            temperature: Temperature for response generation
+            local_llm: Whether to use local LLM via Ollama
+            use_cache: Whether to use caching and cost tracking (default: True)
+            
+        Returns:
+            LLM response or AIMessage object
         """
+        cache_manager = CacheManager()
+        
+        # Check cache first if enabled
+        if use_cache and system_prompt and human_message:
+            cached_response = cache_manager.get_cached_response(system_prompt, human_message)
+            if cached_response:
+                # Return as AIMessage to maintain consistency
+                return AIMessage(content=cached_response)
+        
+        # Create LLM instance
         llm = LLMFactory.create_llm_instance(temperature, local_llm)
 
+        # Prepare and invoke
         if system_prompt and human_message:
             system_prompt = system_prompt.replace("{", "{{").replace("}", "}}")
             human_message = human_message.replace("{", "{{").replace("}", "}}")
@@ -112,11 +136,28 @@ class LLMFactory:
                 ]
             )
             formatted_messages = prompt_obj.format_messages()
-            return llm.invoke(formatted_messages)
+            response = llm.invoke(formatted_messages)
 
         elif human_message:
             human_message = human_message.replace("{", "{{").replace("}", "}}")
-            return llm.invoke(human_message)
+            response = llm.invoke(human_message)
 
         else:
             raise ValueError("At least a human_message must be provided.")
+
+        # Cache and track costs if enabled
+        if use_cache:
+            # Estimate tokens (rough approximation)
+            tokens_used = len((system_prompt or "") + human_message) // 4
+            
+            # Save to cache
+            cache_manager.save_response(system_prompt, human_message, response.content, tokens_used)
+            
+            # Track cost if not using local LLM
+            if not local_llm:
+                load_dotenv(override=True)
+                provider = os.getenv("llm_provider", "mistral")
+                cost = cache_manager.track_cost(provider, tokens_used)
+                print(f"💰 Estimated cost: ${cost:.6f}")
+        
+        return response
